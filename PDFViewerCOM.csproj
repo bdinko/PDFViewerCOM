@@ -4,8 +4,8 @@
     <!-- ClarionCOMHome: Path to global ClarionCOM installation. Falls back to %APPDATA%\ClarionCOM -->
     <ClarionCOMHome Condition="'$(ClarionCOMHome)' == ''">$(APPDATA)\ClarionCOM</ClarionCOMHome>
 
-    <!-- Target Framework - must be .NET Framework 4.7.2 for COM support -->
-    <TargetFramework>net472</TargetFramework>
+    <!-- Target Framework - .NET Framework 4.8 (superset of 4.7.2, included in Windows 10/11) -->
+    <TargetFramework>net48</TargetFramework>
 
     <!-- Enable Windows Forms (required for UserControl-based controls) -->
     <UseWindowsForms>true</UseWindowsForms>

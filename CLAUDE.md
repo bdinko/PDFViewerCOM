@@ -10,10 +10,15 @@ PDFViewerCOM is a Registration-Free COM control for Clarion applications that pr
 
 ```bash
 # Build Release (x86 required for 32-bit Clarion)
-msbuild PDFViewerCOM.csproj /p:Configuration=Release /p:Platform=x86
+"C:\Program Files\dotnet\dotnet.exe" msbuild PDFViewerCOM.csproj -p:Configuration=Release -p:Platform=x86
 
 # Build Debug
-msbuild PDFViewerCOM.csproj /p:Configuration=Debug /p:Platform=x86
+"C:\Program Files\dotnet\dotnet.exe" msbuild PDFViewerCOM.csproj -p:Configuration=Debug -p:Platform=x86
+```
+
+**Note:** Use `dotnet msbuild` (not standalone MSBuild). A NuGet restore is required on first build:
+```bash
+"C:\Program Files\dotnet\dotnet.exe" restore PDFViewerCOM.csproj
 ```
 
 The build automatically:
@@ -44,7 +49,7 @@ The C# control exposes `window.chrome.webview.hostObjects.PDFViewerCOMHost` for 
 
 ## Key Technical Details
 
-- **Target Framework**: .NET Framework 4.7.2
+- **Target Framework**: .NET Framework 4.8 (net48 — included in Windows 10/11)
 - **Platform**: x86 only (32-bit Clarion requirement)
 - **COM Activation**: Registration-free via manifest (no regasm)
 - **WebView2**: Virtual host mapping at `https://localapp.clarioncontrols/`
