@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+  <assemblyIdentity
+      name="PDFViewerCOM"
+      version="1.0.0.0"
+      processorArchitecture="x86"
+      type="win32"/>
+
+  <clrClass
+      clsid="{2193ddb6-df52-40bc-a41c-b0f0788963a7}"
+      progid="PDFViewerCOM.PDFViewerCOMControl"
+      threadingModel="Apartment"
+      name="PDFViewerCOM.PDFViewerCOMControl"
+      runtimeVersion="v4.0.30319">
+  </clrClass>
+
+  <file name="PDFViewerCOM.dll">
+     <typelib
+         tlbid="{98d6e5d5-ccd2-4f6d-811a-d97f2ca5bc4b}"
+         version="1.0"
+         helpdir=""
+         resourceid="0"
+         flags="HASDISKIMAGE"/>
+  </file>
+</assembly>

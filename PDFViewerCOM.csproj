@@ -1,0 +1,188 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <!-- ClarionCOMHome: Path to global ClarionCOM installation. Falls back to %APPDATA%\ClarionCOM -->
+    <ClarionCOMHome Condition="'$(ClarionCOMHome)' == ''">$(APPDATA)\ClarionCOM</ClarionCOMHome>
+
+    <!-- Target Framework - must be .NET Framework 4.7.2 for COM support -->
+    <TargetFramework>net472</TargetFramework>
+
+    <!-- Enable Windows Forms (required for UserControl-based controls) -->
+    <UseWindowsForms>true</UseWindowsForms>
+
+    <!-- CRITICAL: Must be x86 for 32-bit Clarion -->
+    <PlatformTarget>x86</PlatformTarget>
+
+    <!-- Output as a library (DLL) -->
+    <OutputType>Library</OutputType>
+
+    <!-- Runtime identifier for 32-bit Windows -->
+    <RuntimeIdentifier>win-x86</RuntimeIdentifier>
+
+    <!-- COM configuration for RegFree COM -->
+    <!-- NOTE: We do NOT use EnableComInterop because it generates unwanted .tlb files -->
+    <!-- We use the .manifest file for COM registration instead -->
+
+    <!-- Make assembly COM-visible -->
+    <ComVisible>true</ComVisible>
+
+    <!-- Use manual AssemblyInfo.cs -->
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <!-- NuGet Package References -->
+  <ItemGroup>
+    <!-- WebView2 Runtime for embedded Chromium browser control -->
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.3595.46" />
+
+    <!-- JSON serialization for JS interop -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+  <!-- CRITICAL: Exclude Template folder from compilation -->
+  <!-- This prevents duplicate assembly attributes when COMTemplate is copied to a project -->
+  <ItemGroup>
+    <Compile Remove="Template\**\*" />
+    <None Remove="Template\**\*" />
+    <Content Remove="Template\**\*" />
+    <EmbeddedResource Remove="Template\**\*" />
+  </ItemGroup>
+
+  <!-- Include wwwroot content files -->
+  <ItemGroup>
+    <Content Include="wwwroot\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <!-- Deploy path is at parent level (outside Template folder) -->
+    <!-- New structure: Clarion/accessory/bin and Clarion/accessory/resources -->
+    <ClarionDeployPath>$(ProjectDir)..\Clarion\</ClarionDeployPath>
+    <ClarionAccessoryPath>$(ClarionDeployPath)accessory\</ClarionAccessoryPath>
+    <ClarionBinPath>$(ClarionAccessoryPath)bin\</ClarionBinPath>
+    <ClarionResourcesPath>$(ClarionAccessoryPath)resources\</ClarionResourcesPath>
+  </PropertyGroup>
+
+  <!-- AUTO VERSION SYNC: Check for existing WebView2 DLLs and sync version before build -->
+  <!-- This prevents version mismatch errors when multiple WebView2 controls are used together -->
+  <Target Name="SyncWebView2Version" BeforeTargets="Restore;Build">
+    <PropertyGroup>
+      <VersionCheckScript>$(ClarionCOMHome)\scripts\check-webview2-version.ps1</VersionCheckScript>
+      <ClarionEnvScript>$(ClarionCOMHome)\scripts\clarioncom-env.ps1</ClarionEnvScript>
+    </PropertyGroup>
+
+    <!-- Only run if the script exists and Clarion path is configured -->
+    <Exec Command="powershell -ExecutionPolicy Bypass -Command &quot;$clarionPath = &amp; '$(ClarionEnvScript)' clarion 2>$null; if ($clarionPath -and $clarionPath -ne 'NOT_CONFIGURED' -and (Test-Path '$(VersionCheckScript)')) { &amp; '$(VersionCheckScript)' -CsprojPath '$(MSBuildProjectFullPath)' -ClarionPath $clarionPath } else { Write-Host 'WebView2 version check skipped (Clarion path not configured or script not found)' -ForegroundColor Gray }&quot;"
+          IgnoreExitCode="true"
+          ConsoleToMSBuild="true">
+      <Output TaskParameter="ConsoleOutput" PropertyName="VersionCheckOutput" />
+    </Exec>
+
+    <Message Text="WebView2 Version Check: $(VersionCheckOutput)" Importance="high" Condition="'$(VersionCheckOutput)' != ''" />
+  </Target>
+
+  <!-- Deploy DLLs to Clarion/accessory/bin, manifest and wwwroot to Clarion/accessory/resources -->
+  <Target Name="DeployClarionFiles" AfterTargets="Build">
+    <ItemGroup>
+      <!-- All DLLs from output (includes WebView2, Newtonsoft.Json, DevExpress, and any other dependencies) -->
+      <DllFiles Include="$(OutputPath)*.dll" />
+    </ItemGroup>
+
+    <!-- Create folder structure: accessory/bin and accessory/resources -->
+    <MakeDir Directories="$(ClarionBinPath)" Condition="!Exists('$(ClarionBinPath)')" />
+    <MakeDir Directories="$(ClarionResourcesPath)" Condition="!Exists('$(ClarionResourcesPath)')" />
+    <MakeDir Directories="$(ClarionResourcesPath)wwwroot" Condition="!Exists('$(ClarionResourcesPath)wwwroot')" />
+
+    <!-- Copy DLLs to accessory/bin/ -->
+    <Copy SourceFiles="@(DllFiles)"
+          DestinationFolder="$(ClarionBinPath)"
+          SkipUnchangedFiles="true" />
+
+    <!-- Copy manifest to accessory/resources/ -->
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).manifest"
+          DestinationFolder="$(ClarionResourcesPath)"
+          SkipUnchangedFiles="true"
+          Condition="Exists('$(OutputPath)$(AssemblyName).manifest')" />
+
+    <!-- Copy batch file to accessory/resources/ (if exists) -->
+    <Copy SourceFiles="$(ProjectDir)create-wwwroot-folders.bat"
+          DestinationFolder="$(ClarionResourcesPath)"
+          SkipUnchangedFiles="true"
+          Condition="Exists('$(ProjectDir)create-wwwroot-folders.bat')" />
+
+    <!-- Copy wwwroot folder to accessory/resources/wwwroot/ using robocopy for reliable recursive copy -->
+    <Exec Command="robocopy &quot;$(OutputPath)wwwroot&quot; &quot;$(ClarionResourcesPath)wwwroot&quot; /E /NFL /NDL /NJH /NJS /NC /NS"
+          IgnoreExitCode="true"
+          Condition="Exists('$(OutputPath)wwwroot')" />
+
+    <Message Text="Deployed DLLs to $(ClarionBinPath)" Importance="high" />
+    <Message Text="Deployed manifest to $(ClarionResourcesPath)" Importance="high" />
+    <Message Text="Deployed wwwroot to $(ClarionResourcesPath)wwwroot" Importance="high" Condition="Exists('$(OutputPath)wwwroot')" />
+  </Target>
+
+  <!-- Generate Clarion metadata files (.header, .details, .events, .methods) using ProgID-based naming -->
+  <Target Name="GenerateClarionMetadata" AfterTargets="DeployClarionFiles">
+    <PropertyGroup>
+      <!-- Scripts are in ClarionCOMHome\scripts folder -->
+      <MetadataScriptPath>$(ClarionCOMHome)\scripts\GenerateClarionMetadata.ps1</MetadataScriptPath>
+      <MetadataProjectDir>$(ProjectDir.TrimEnd('\'))</MetadataProjectDir>
+      <MetadataDeployPath>$(ClarionResourcesPath.TrimEnd('\'))</MetadataDeployPath>
+    </PropertyGroup>
+    <Exec Command="powershell.exe -NoProfile -ExecutionPolicy Bypass -Command &quot;&amp; { &amp; '$(MetadataScriptPath)' -ProjectDir '$(MetadataProjectDir)' -AssemblyName '$(AssemblyName)' -ClarionDeployPath '$(MetadataDeployPath)' }&quot;" />
+    <Message Text="Generated Clarion metadata files to $(ClarionResourcesPath)" Importance="high" />
+  </Target>
+
+  <!-- Generate COM manifest file for RegFree COM -->
+  <Target Name="GenerateManifestFile" AfterTargets="GenerateClarionMetadata">
+    <PropertyGroup>
+      <!-- Manifest template is in Template folder (same as .csproj) -->
+      <ManifestSource>$(ProjectDir)PDFViewerCOM.manifest</ManifestSource>
+      <ManifestDest>$(ClarionResourcesPath)$(AssemblyName).manifest</ManifestDest>
+    </PropertyGroup>
+
+    <!-- Copy and update the manifest file -->
+    <Copy SourceFiles="$(ManifestSource)" DestinationFiles="$(ManifestDest)" SkipUnchangedFiles="false" />
+
+    <Message Text="Generated manifest file: $(ManifestDest)" Importance="high" />
+    <Message Text="Note: Manifest file uses template GUIDs. When creating a new control, Claude will update these with actual GUIDs." Importance="high" />
+  </Target>
+
+
+  <!-- Parse COM interface files to extract properties, methods, and events -->
+  <Target Name="ParseCOMInterface" AfterTargets="GenerateManifestFile">
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ClarionCOMHome)\scripts\ParseCOMInterface.ps1&quot; -ProjectDir &quot;$(ProjectDir)&quot;" />
+    <Message Text="Parsed COM interface files for documentation" Importance="high" />
+  </Target>
+
+  <!-- Generate README.html documentation for Clarion folder -->
+  <Target Name="GenerateReadmeHtml" AfterTargets="ParseCOMInterface">
+    <PropertyGroup>
+      <ReadmeFile>$(ClarionResourcesPath)readme_$(AssemblyName).html</ReadmeFile>
+      <ParsedDataFile>$(ProjectDir)ParsedInterface.json</ParsedDataFile>
+    </PropertyGroup>
+
+    <!-- Generate README with dynamic content using PowerShell script from ClarionCOMHome\scripts -->
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(ClarionCOMHome)\scripts\GenerateReadmeHTML.ps1&quot; -ParsedDataFile &quot;$(ParsedDataFile)&quot; -OutputFile &quot;$(ReadmeFile)&quot; -AssemblyName &quot;$(AssemblyName)&quot;" />
+
+    <Message Text="Generated README.html: $(ReadmeFile)" Importance="high" />
+  </Target>
+
+  <!-- AUTO-DEPLOY: Copy all files to Clarion installation (if configured) -->
+  <!-- Reads from Project/Clarion/accessory/ and copies to Clarion installation accessory folder -->
+  <!-- DLLs go to accessory\bin\, other files (manifest, metadata) go to accessory\resources\ -->
+  <!-- wwwroot goes to accessory\resources\wwwroot\ -->
+  <Target Name="DeployToClarionInstallation" AfterTargets="GenerateReadmeHtml">
+    <PropertyGroup>
+      <CopyScript>$(ClarionCOMHome)\scripts\copy-to-clarion.ps1</CopyScript>
+      <ClarionEnvScript>$(ClarionCOMHome)\scripts\clarioncom-env.ps1</ClarionEnvScript>
+    </PropertyGroup>
+
+    <!-- This target automatically copies all files from Project\Clarion\accessory to the Clarion installation -->
+    <!-- DLLs to accessory\bin\, other files to accessory\resources\, wwwroot to accessory\resources\wwwroot\ -->
+    <Exec Command="powershell -ExecutionPolicy Bypass -Command &quot;$clarionPath = &amp; '$(ClarionEnvScript)' clarion; if ($clarionPath -and $clarionPath -ne 'NOT_CONFIGURED') { &amp; '$(CopyScript)' -ProjectFolder '$(ClarionAccessoryPath.TrimEnd('\'))' -ClarionPath $clarionPath -Target 'accessory' } else { Write-Host 'Clarion path not configured - skipping auto-deploy. Run /ClarionCOM to configure.' -ForegroundColor Yellow }&quot;"
+          IgnoreExitCode="true" />
+  </Target>
+
+
+</Project>
