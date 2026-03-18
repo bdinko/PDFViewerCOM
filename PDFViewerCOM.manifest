@@ -2,7 +2,7 @@
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
   <assemblyIdentity
       name="PDFViewerCOM"
-      version="1.0.2.0"
+      version="1.0.3.0"
       processorArchitecture="x86"
       type="win32"/>
 
