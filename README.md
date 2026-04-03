@@ -9,17 +9,18 @@ Built with the [ClarionCOM](https://github.com/peterparker57/ClarionCOM) framewo
 ## Features
 
 - **PDF Rendering** — High-quality rendering via Mozilla's PDF.js
-- **Multiple Load Sources** — Open PDFs from file paths, URLs, or Base64-encoded data
+- **Multiple Load Sources** — Open PDFs from file paths, URLs, Base64-encoded data, or Clarion Blob fields (via StringTheory)
 - **Page Navigation** — Go to any page, next/previous, first/last
 - **Zoom Controls** — Zoom in/out, fit width, fit page, actual size, custom percentage
 - **Text Search** — Find text with case sensitivity, navigate between matches
-- **Annotations** — Highlights, sticky notes, freehand drawing with import/export (JSON)
+- **Annotations** — Highlights, sticky notes, freehand drawing with shapes, colors, select/move, undo, import/export (JSON)
 - **Sidebar** — Thumbnail previews and document bookmarks/outline
 - **Page Rotation** — Clockwise and counter-clockwise rotation
-- **Print & Save** — System print dialog and save-as with annotations
+- **Print & Save** — System print dialog, save-as with annotations flattened (interactive), and `SaveAsBase64` for StringTheory / blob round-trips
+- **Permission Flags** — Per-feature show/hide for Highlight, Notes, Drawing, Save As, Sidebar, Annotations — set in `EVENT:OpenWindow` for role-based UI
 - **Text Selection** — Select and copy text from PDFs
 - **Registration-Free COM** — Manifest-based activation, no `regasm` needed
-- **16 COM Events** — Rich event model for full Clarion integration
+- **17 COM Events** — Rich event model for full Clarion integration
 
 ---
 
@@ -84,7 +85,8 @@ PDFViewer   OCX('PDFViewerCOM.PDFViewerCOMControl')
 | `LoadUrl(url)` | Load a PDF from a URL |
 | `LoadBase64(base64Data)` | Load a PDF from Base64-encoded data |
 | `CloseDocument()` | Close the current document |
-| `SaveAs(filePath)` | Save the PDF (with annotations) to a file |
+| `SaveAs(filePath)` | Save the original PDF bytes to a file |
+| `SaveAsBase64()` | Save current view with all annotations as Base64; result fires `SaveAsBase64Ready` |
 | `Print()` | Open the system print dialog |
 
 ### Navigation
@@ -132,6 +134,17 @@ PDFViewer   OCX('PDFViewerCOM.PDFViewerCOMControl')
 | `ImportAnnotations(json)` | Import annotations from JSON |
 | `GetAnnotationsEnabled()` | Check if annotations are enabled |
 | `SetAnnotationsEnabled(value)` | Enable or disable annotations |
+
+### Permission Properties
+
+| Property | Type | Default | Description |
+|---|---|---|---|
+| `AllowHighlight` | bool | **false** | Show/hide the Highlight toolbar button |
+| `AllowNotes` | bool | **false** | Show/hide the Note toolbar button |
+| `AllowDrawing` | bool | **false** | Show/hide the Draw toolbar button |
+| `AllowSaveAs` | bool | true | Show/hide the Download (Save As) button |
+
+Annotation buttons are hidden by default. Set `AllowHighlight`, `AllowNotes`, and/or `AllowDrawing` to `true` after confirming user permissions. `AllowSaveAs` is enabled by default and must be explicitly set to `false` to hide it.
 
 ### View Options
 
@@ -186,6 +199,7 @@ PDFViewer   OCX('PDFViewerCOM.PDFViewerCOMControl')
 | `NavigationStarting` | `url` | WebView2 navigation started |
 | `NavigationCompleted` | `url`, `success` | WebView2 navigation finished |
 | `PrintCompleted` | `success` | Print operation finished |
+| `SaveAsBase64Ready` | `base64Data` | `SaveAsBase64()` completed; `base64Data` is the annotated PDF |
 | `ErrorOccurred` | `errorMessage` | An error occurred |
 
 ---

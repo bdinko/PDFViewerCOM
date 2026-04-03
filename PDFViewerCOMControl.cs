@@ -74,6 +74,7 @@ namespace PDFViewerCOM
         private WebView2 _webView;
         private PDFViewerCOMHostObject _hostObject;
         private bool _isReady;
+        private bool _viewerReady;
         private string _lastError;
         private string _currentSource;
         private bool _isInitialized;
@@ -84,6 +85,13 @@ namespace PDFViewerCOM
         private double _zoomLevel;
         private bool _sidebarVisible;
         private bool _annotationsEnabled;
+        private bool _allowHighlight = false;
+        private bool _allowNotes = false;
+        private bool _allowDrawing = false;
+        private bool _allowSaveAs = true;
+        private string _filePath;
+        private string _base64Data;
+        private byte[] _pdfSourceBytes;
 
         #endregion
 
@@ -105,6 +113,7 @@ namespace PDFViewerCOM
         public delegate void LinkClickedDelegate(string url, bool isInternal);
         public delegate void PrintCompletedDelegate(bool success);
         public delegate void ViewerReadyDelegate();
+        public delegate void SaveAsBase64ReadyDelegate(string base64Data);
 
         #endregion
 
@@ -126,6 +135,7 @@ namespace PDFViewerCOM
         public event LinkClickedDelegate LinkClicked;
         public event PrintCompletedDelegate PrintCompleted;
         public event ViewerReadyDelegate ViewerReady;
+        public event SaveAsBase64ReadyDelegate SaveAsBase64Ready;
 
         #endregion
 
@@ -138,6 +148,7 @@ namespace PDFViewerCOM
         public PDFViewerCOMControl()
         {
             _isReady = false;
+            _viewerReady = false;
             _lastError = string.Empty;
             _currentSource = string.Empty;
             _isInitialized = false;
@@ -301,6 +312,9 @@ namespace PDFViewerCOM
                 {
                     case "ready":
                         // PDF.js viewer is ready - safe to load documents now
+                        _viewerReady = true;
+                        ApplyPermissions();
+                        ApplyInitialViewerState();
                         RaiseViewerReady();
                         break;
 
@@ -350,6 +364,10 @@ namespace PDFViewerCOM
 
                     case "printCompleted":
                         RaisePrintCompleted(msg.success);
+                        break;
+
+                    case "downloadRequested":
+                        HandleDownloadRequest();
                         break;
 
                     case "error":
@@ -467,7 +485,15 @@ namespace PDFViewerCOM
         public void SetSidebarVisible(bool value)
         {
             _sidebarVisible = value;
-            ExecuteScript($"window.pdfViewer.setSidebarVisible({value.ToString().ToLower()});");
+            ExecuteScript($"window.pdfViewer?.setSidebarVisible({value.ToString().ToLower()});");
+        }
+
+        [ComVisible(true)]
+        [Description("Gets or sets whether the sidebar is visible. Safe to set before ViewerReady.")]
+        public bool SidebarVisible
+        {
+            get => _sidebarVisible;
+            set { _sidebarVisible = value; ExecuteScript($"window.pdfViewer?.setSidebarVisible({value.ToString().ToLower()});"); }
         }
 
         [ComVisible(true)]
@@ -482,7 +508,69 @@ namespace PDFViewerCOM
         public void SetAnnotationsEnabled(bool value)
         {
             _annotationsEnabled = value;
-            ExecuteScript($"window.pdfViewer.setAnnotationsEnabled({value.ToString().ToLower()});");
+            ExecuteScript($"window.pdfViewer?.setAnnotationsEnabled({value.ToString().ToLower()});");
+        }
+
+        [ComVisible(true)]
+        [Description("Gets or sets whether annotations are enabled. Safe to set before ViewerReady.")]
+        public bool AnnotationsEnabled
+        {
+            get => _annotationsEnabled;
+            set { _annotationsEnabled = value; ExecuteScript($"window.pdfViewer?.setAnnotationsEnabled({value.ToString().ToLower()});"); }
+        }
+
+        [ComVisible(true)]
+        [Description("Gets or sets whether the Highlight button is visible")]
+        public bool AllowHighlight
+        {
+            get => _allowHighlight;
+            set { _allowHighlight = value; ApplyPermissions(); }
+        }
+
+        [ComVisible(true)]
+        [Description("Gets or sets whether the Note button is visible")]
+        public bool AllowNotes
+        {
+            get => _allowNotes;
+            set { _allowNotes = value; ApplyPermissions(); }
+        }
+
+        [ComVisible(true)]
+        [Description("Gets or sets whether the Draw button is visible")]
+        public bool AllowDrawing
+        {
+            get => _allowDrawing;
+            set { _allowDrawing = value; ApplyPermissions(); }
+        }
+
+        [ComVisible(true)]
+        [Description("Gets or sets whether the Save As (Download) button is visible")]
+        public bool AllowSaveAs
+        {
+            get => _allowSaveAs;
+            set { _allowSaveAs = value; ApplyPermissions(); }
+        }
+
+        private void ApplyInitialViewerState()
+        {
+            // Apply any viewer state that was set before ViewerReady fired.
+            // Only push non-default values to avoid overriding the viewer's own initialization.
+            if (!_sidebarVisible)
+                ExecuteScript($"window.pdfViewer?.setSidebarVisible(false);");
+            if (!_annotationsEnabled)
+                ExecuteScript($"window.pdfViewer?.setAnnotationsEnabled(false);");
+        }
+
+        private void ApplyPermissions()
+        {
+            if (!_isReady) return;
+            var script = $"window.pdfViewer?.setPermissions({{" +
+                         $"allowHighlight:{(_allowHighlight ? "true" : "false")}," +
+                         $"allowNotes:{(_allowNotes ? "true" : "false")}," +
+                         $"allowDrawing:{(_allowDrawing ? "true" : "false")}," +
+                         $"allowSaveAs:{(_allowSaveAs ? "true" : "false")}" +
+                         $"}});";
+            ExecuteScript(script);
         }
 
         #endregion
@@ -490,14 +578,45 @@ namespace PDFViewerCOM
         #region Document Operations
 
         [ComVisible(true)]
+        [Description("File path to load when LoadFilePath() is called. Workaround for Clarion late-binding.")]
+        public string FilePath
+        {
+            get { return _filePath ?? ""; }
+            set { _filePath = value; }
+        }
+
+        [ComVisible(true)]
+        [Description("Load the PDF file stored in the FilePath property. Returns the file path on success, or error message on failure.")]
+        public string LoadFilePath()
+        {
+            LoadFile(_filePath ?? "");
+            return _filePath ?? "";
+        }
+
+        [ComVisible(true)]
+        [Description("Base64-encoded PDF data to load when LoadBase64Data() is called. Workaround for Clarion late-binding.")]
+        public string Base64Data
+        {
+            get { return _base64Data ?? ""; }
+            set { _base64Data = value; }
+        }
+
+        [ComVisible(true)]
+        [Description("Load the PDF from the Base64Data property. Set Base64Data first, then call this method.")]
+        public void LoadBase64Data()
+        {
+            LoadBase64(_base64Data ?? "");
+        }
+
+        [ComVisible(true)]
         [Description("Load a PDF file from a file path")]
         public void LoadFile(string filePath)
         {
             try
             {
-                if (!_isReady || _webView == null)
+                if (!_viewerReady || _webView == null)
                 {
-                    SetError("WebView2 not ready");
+                    SetError("PDF viewer not ready - wait for ViewerReady event before calling LoadFile");
                     return;
                 }
 
@@ -515,6 +634,7 @@ namespace PDFViewerCOM
 
                 // Read file and convert to Base64
                 byte[] fileBytes = File.ReadAllBytes(filePath);
+                _pdfSourceBytes = fileBytes;
                 string base64 = Convert.ToBase64String(fileBytes);
 
                 ExecuteScript($"window.pdfViewer.loadBase64('{base64}');");
@@ -531,9 +651,9 @@ namespace PDFViewerCOM
         {
             try
             {
-                if (!_isReady || _webView == null)
+                if (!_viewerReady || _webView == null)
                 {
-                    SetError("WebView2 not ready");
+                    SetError("PDF viewer not ready - wait for ViewerReady event before calling LoadUrl");
                     return;
                 }
 
@@ -558,9 +678,9 @@ namespace PDFViewerCOM
         {
             try
             {
-                if (!_isReady || _webView == null)
+                if (!_viewerReady || _webView == null)
                 {
-                    SetError("WebView2 not ready");
+                    SetError("PDF viewer not ready - wait for ViewerReady event before calling LoadBase64");
                     return;
                 }
 
@@ -570,6 +690,11 @@ namespace PDFViewerCOM
                     return;
                 }
 
+                // Strip whitespace that MIME-formatted encoders (e.g. StringTheory) add every 76 chars.
+                // Embedded newlines break the JavaScript string literal passed to ExecuteScriptAsync.
+                base64Data = base64Data.Replace("\r", "").Replace("\n", "").Trim();
+
+                try { _pdfSourceBytes = Convert.FromBase64String(base64Data); } catch { }
                 ExecuteScript($"window.pdfViewer.loadBase64('{base64Data}');");
             }
             catch (Exception ex)
@@ -1050,19 +1175,96 @@ namespace PDFViewerCOM
         {
             try
             {
-                if (!_isReady || _webView == null)
-                {
-                    SetError("WebView2 not ready");
-                    return;
-                }
-
-                // Trigger download in JavaScript
-                string escapedPath = JsonConvert.SerializeObject(filePath ?? string.Empty);
-                ExecuteScript($"window.pdfViewer.download({escapedPath});");
+                if (string.IsNullOrEmpty(filePath)) return;
+                WritePdfToFile(filePath);
             }
             catch (Exception ex)
             {
                 SetError($"SaveAs error: {ex.Message}");
+            }
+        }
+
+        [ComVisible(true)]
+        [Description("Save the current view with annotations as Base64 PDF. Result fires SaveAsBase64Ready event.")]
+        public async void SaveAsBase64()
+        {
+            try
+            {
+                // Clear any selection indicator before printing
+                await _webView.CoreWebView2.ExecuteScriptAsync("window.pdfViewer?.clearDrawingSelection()");
+
+                string tempPath = Path.ChangeExtension(Path.GetTempFileName(), ".pdf");
+                var ps = _webView.CoreWebView2.Environment.CreatePrintSettings();
+                ps.ShouldPrintBackgrounds = true;
+                ps.MarginTop    = 0;
+                ps.MarginBottom = 0;
+                ps.MarginLeft   = 0;
+                ps.MarginRight  = 0;
+                ps.ScaleFactor  = 1.0;
+
+                await _webView.CoreWebView2.PrintToPdfAsync(tempPath, ps);
+
+                byte[] bytes = File.ReadAllBytes(tempPath);
+                File.Delete(tempPath);
+                RaiseSaveAsBase64Ready(Convert.ToBase64String(bytes));
+            }
+            catch (Exception ex)
+            {
+                SetError($"SaveAsBase64 error: {ex.Message}");
+            }
+        }
+
+        private async void HandleDownloadRequest()
+        {
+            try
+            {
+                string savePath;
+                using (var dlg = new System.Windows.Forms.SaveFileDialog())
+                {
+                    dlg.Title = "Save PDF with Annotations";
+                    dlg.Filter = "PDF Files (*.pdf)|*.pdf|All Files (*.*)|*.*";
+                    dlg.DefaultExt = "pdf";
+                    dlg.FileName = string.IsNullOrEmpty(_filePath)
+                        ? "document.pdf"
+                        : System.IO.Path.GetFileName(_filePath);
+
+                    if (dlg.ShowDialog() != System.Windows.Forms.DialogResult.OK)
+                        return;
+
+                    savePath = dlg.FileName;
+                }
+
+                // Print the full rendered WebView2 view (includes canvas drawings,
+                // highlight overlays, and note annotations) to a PDF file.
+                var ps = _webView.CoreWebView2.Environment.CreatePrintSettings();
+                ps.ShouldPrintBackgrounds = true;
+                ps.MarginTop    = 0;
+                ps.MarginBottom = 0;
+                ps.MarginLeft   = 0;
+                ps.MarginRight  = 0;
+                ps.ScaleFactor  = 1.0;
+
+                await _webView.CoreWebView2.PrintToPdfAsync(savePath, ps);
+            }
+            catch (Exception ex)
+            {
+                SetError($"Download error: {ex.Message}");
+            }
+        }
+
+        private void WritePdfToFile(string destPath)
+        {
+            if (_pdfSourceBytes != null && _pdfSourceBytes.Length > 0)
+            {
+                System.IO.File.WriteAllBytes(destPath, _pdfSourceBytes);
+            }
+            else if (!string.IsNullOrEmpty(_filePath) && System.IO.File.Exists(_filePath))
+            {
+                System.IO.File.Copy(_filePath, destPath, overwrite: true);
+            }
+            else
+            {
+                SetError("No PDF data available to save.");
             }
         }
 
@@ -1435,6 +1637,15 @@ namespace PDFViewerCOM
             if (ViewerReady != null)
             {
                 try { ViewerReady(); }
+                catch { }
+            }
+        }
+
+        private void RaiseSaveAsBase64Ready(string base64Data)
+        {
+            if (SaveAsBase64Ready != null)
+            {
+                try { SaveAsBase64Ready(base64Data); }
                 catch { }
             }
         }

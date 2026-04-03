@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PDF Viewer</title>
 
-    <!-- PDF.js Library - loaded from CDN -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.mjs" type="module"></script>
+    <!-- PDF.js Library - loaded locally as regular script (not module) for WebView2 virtual host compatibility -->
+    <script src="../../lib/pdfjs/pdf.min.js"></script>
 
     <!-- PDF Viewer Styles -->
     <link rel="stylesheet" href="../../css/pdfviewer.css">

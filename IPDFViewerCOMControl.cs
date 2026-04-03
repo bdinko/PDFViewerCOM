@@ -79,6 +79,14 @@ namespace PDFViewerCOM
         void SetSidebarVisible(bool value);
 
         /// <summary>
+        /// Gets or sets whether the sidebar is visible.
+        /// Use from Clarion: PDFViewerCOM_Ctrl{'SidebarVisible'} = 0  (0=hide, 1=show)
+        /// Can be set before ViewerReady — applied automatically when viewer initializes.
+        /// </summary>
+        [DispId(101)]
+        bool SidebarVisible { get; set; }
+
+        /// <summary>
         /// Gets whether annotations are enabled.
         /// </summary>
         /// <returns>True if annotations are enabled</returns>
@@ -92,9 +100,73 @@ namespace PDFViewerCOM
         [DispId(92)]
         void SetAnnotationsEnabled(bool value);
 
+        /// <summary>
+        /// Gets or sets whether annotations are enabled.
+        /// Use from Clarion: PDFViewerCOM_Ctrl{'AnnotationsEnabled'} = 0  (0=disable, 1=enable)
+        /// Can be set before ViewerReady — applied automatically when viewer initializes.
+        /// </summary>
+        [DispId(102)]
+        bool AnnotationsEnabled { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the Highlight button is visible. Default: false.
+        /// Must be explicitly set to true to enable highlighting.
+        /// </summary>
+        [DispId(95)]
+        bool AllowHighlight { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the Note button is visible. Default: false.
+        /// Must be explicitly set to true to enable note annotations.
+        /// </summary>
+        [DispId(96)]
+        bool AllowNotes { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the Draw button is visible. Default: false.
+        /// Must be explicitly set to true to enable drawing.
+        /// </summary>
+        [DispId(97)]
+        bool AllowDrawing { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the Save As (Download) button is visible. Default: true.
+        /// Set to false to prevent users from saving the document.
+        /// </summary>
+        [DispId(98)]
+        bool AllowSaveAs { get; set; }
+
         #endregion
 
         #region Document Operations
+
+        /// <summary>
+        /// File path to load when LoadFilePath() is called. Set this before calling LoadFilePath().
+        /// Workaround for Clarion late-binding which cannot pass parameters to COM methods.
+        /// </summary>
+        [DispId(93)]
+        string FilePath { get; set; }
+
+        /// <summary>
+        /// Load the PDF file stored in the FilePath property.
+        /// Use this from Clarion: set FilePath property first, then call LoadFilePath().
+        /// </summary>
+        [DispId(94)]
+        string LoadFilePath();
+
+        /// <summary>
+        /// Base64-encoded PDF data to load when LoadBase64Data() is called.
+        /// Workaround for Clarion late-binding which cannot pass parameters to COM methods.
+        /// </summary>
+        [DispId(99)]
+        string Base64Data { get; set; }
+
+        /// <summary>
+        /// Load the PDF from the Base64Data property.
+        /// Use this from Clarion: set Base64Data property first, then call LoadBase64Data().
+        /// </summary>
+        [DispId(100)]
+        void LoadBase64Data();
 
         /// <summary>
         /// Load a PDF file from a file path.
@@ -300,6 +372,14 @@ namespace PDFViewerCOM
         /// <param name="filePath">Destination file path</param>
         [DispId(61)]
         void SaveAs(string filePath);
+
+        /// <summary>
+        /// Save the current view with all annotations (highlights, notes, drawings) as a Base64-encoded PDF.
+        /// The result is returned asynchronously via the SaveAsBase64Ready event.
+        /// Use this when the document was loaded via LoadBase64 (e.g., from a StringTheory object).
+        /// </summary>
+        [DispId(62)]
+        void SaveAsBase64();
 
         #endregion
 

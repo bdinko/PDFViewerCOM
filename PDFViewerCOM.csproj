@@ -184,5 +184,24 @@
           IgnoreExitCode="true" />
   </Target>
 
+  <!-- AUTO-DEPLOY: Secondary Clarion installation (Clarion 11.1-13810) -->
+  <!-- Change ClarionSecondaryPath to target a different installation. -->
+  <!-- Skips silently if the folder does not exist on this machine. -->
+  <Target Name="DeployToClarionSecondary" AfterTargets="DeployToClarionInstallation">
+    <PropertyGroup>
+      <ClarionSecondaryPath>C:\Clarion11.1-13810</ClarionSecondaryPath>
+      <CopyScript>$(ClarionCOMHome)\scripts\copy-to-clarion.ps1</CopyScript>
+    </PropertyGroup>
+
+    <Exec Command="powershell -ExecutionPolicy Bypass -Command &quot;&amp; '$(CopyScript)' -ProjectFolder '$(ClarionAccessoryPath.TrimEnd('\'))' -ClarionPath '$(ClarionSecondaryPath)' -Target 'accessory'&quot;"
+          IgnoreExitCode="true"
+          Condition="Exists('$(ClarionSecondaryPath)')" />
+
+    <Message Text="Deployed to secondary Clarion: $(ClarionSecondaryPath)" Importance="high"
+             Condition="Exists('$(ClarionSecondaryPath)')" />
+    <Message Text="Secondary Clarion path not found, skipping: $(ClarionSecondaryPath)" Importance="normal"
+             Condition="!Exists('$(ClarionSecondaryPath)')" />
+  </Target>
+
 
 </Project>

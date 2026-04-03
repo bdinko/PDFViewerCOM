@@ -130,5 +130,13 @@ namespace PDFViewerCOM
         /// </summary>
         [DispId(16)]
         void ViewerReady();
+
+        /// <summary>
+        /// Fired when SaveAsBase64() completes. Contains the annotated PDF as Base64-encoded data.
+        /// Pass Parm1 to a StringTheory object (e.g., st.SetValue(PDFViewerCOM.Parm1.GetValue())).
+        /// </summary>
+        /// <param name="base64Data">Base64-encoded PDF bytes including all annotations</param>
+        [DispId(17)]
+        void SaveAsBase64Ready(string base64Data);
     }
 }
