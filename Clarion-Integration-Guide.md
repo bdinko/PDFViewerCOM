@@ -212,8 +212,13 @@ UCProcessCOMEvents_PDFViewerCOM   PROCEDURE(PDFViewerCOM UltimateCOM)
     PrintOk = PDFViewerCOM.Parm1.GetLong()      ! 1 = success, 0 = failed
 
   OF 'SaveAsBase64Ready'
-    ! Called after SaveAsBase64() — use with StringTheory for blob round-trips
-    ST.SetValue(PDFViewerCOM.Parm1.GetValue())  ! base64-encoded annotated PDF
+    ! Called after SaveAsBase64() — flattened annotated PDF
+    ST.SetValue(PDFViewerCOM.Parm1.GetValue())  ! base64-encoded flattened PDF
+
+  OF 'AnnotationsExported'
+    ! Called after ExportAnnotations() — use for editable round-trips
+    AnnotJsonField = PDFViewerCOM.Parm1.GetValue()  ! JSON: { annotations, drawingHistory }
+    ! Store AnnotJsonField in a memo/blob field alongside the original PDF
 
   OF 'ErrorOccurred'
     ErrMsg = PDFViewerCOM.Parm1.GetValue()      ! error description
@@ -380,17 +385,29 @@ PDFViewerCOM_Ctrl{'DisableDrawing'}
 PDFViewerCOM_Ctrl{'ClearAnnotations'}
 ```
 
-#### Export annotations as JSON (returns STRING)
+#### Export annotations (asynchronous — result fires AnnotationsExported event)
 
 ```clarion
-AnnotJson = PDFViewerCOM_Ctrl{'ExportAnnotations'}
+PDFViewerCOM_Ctrl{'ExportAnnotations'}
+! Result arrives in AnnotationsExported event — read PDFViewerCOM.Parm1.GetValue()
+! JSON format: { "annotations": [...], "drawingHistory": {...} }
+! Store this JSON alongside the original SourceBase64 for editable round-trips.
 ```
 
-#### Import annotations from JSON
+#### Get original PDF bytes as Base64
 
 ```clarion
-PDFViewerCOM_Ctrl{'ExecuteScript'} = |
-  'window.pdfViewer.importAnnotations(' & clip(AnnotJson) & ')'
+OrigB64 = PDFViewerCOM_Ctrl{'SourceBase64'}
+! Returns the unmodified PDF bytes that were loaded (via LoadFile or LoadBase64).
+! Store this separately from annotation JSON for the two-column storage pattern.
+```
+
+#### Import annotations from JSON (Clarion-friendly — no parameter needed)
+
+```clarion
+PDFViewerCOM_Ctrl{'AnnotationsData'} = clip(AnnotJsonField)
+PDFViewerCOM_Ctrl{'ImportAnnotationsData'}
+! Call AFTER DocumentLoaded event fires. Restores highlights, notes, and drawings.
 ```
 
 ---
@@ -488,6 +505,11 @@ PDFViewerCOM_Ctrl{'PropertyName'} = value      ! set
 | Property | Clarion Type | Default | Description |
 |----------|-------------|---------|-------------|
 | `FilePath` | STRING | `''` | Path set before calling `LoadFilePath` |
+| `Base64Data` | STRING | `''` | Base64 PDF data set before calling `LoadBase64Data` |
+| `SourceBase64` | STRING (read-only) | `''` | Original PDF bytes as Base64 (set automatically by `LoadFile`/`LoadBase64`); store with annotation JSON for editable round-trips |
+| `AnnotationsData` | STRING | `'{}'` | Annotation JSON to import; set before calling `ImportAnnotationsData` |
+| `SidebarVisible` | BYTE | 1 | Show/hide sidebar; safe to set before `ViewerReady` |
+| `AnnotationsEnabled` | BYTE | 1 | Enable/disable all annotation UI; safe to set before `ViewerReady` |
 | `AllowHighlight` | BYTE | **0** | Show/hide Highlight toolbar button — must be explicitly enabled |
 | `AllowNotes` | BYTE | **0** | Show/hide Note toolbar button — must be explicitly enabled |
 | `AllowDrawing` | BYTE | **0** | Show/hide Draw toolbar button — must be explicitly enabled |
@@ -525,7 +547,8 @@ Events arrive at `PDFViewerCOM_Event`. Read parameters from `PDFViewerCOM.Parm1.
 | `ThumbnailClicked` | pageNumber (LONG) | — | Optional: sync page nav |
 | `LinkClicked` | url (STRING) | isInternal (LONG) | Optional: handle external links |
 | `PrintCompleted` | success (LONG) | — | Show success/error message |
-| `SaveAsBase64Ready` | base64Data (STRING) | — | Write annotated PDF to blob/StringTheory |
+| `SaveAsBase64Ready` | base64Data (STRING) | — | Write flattened annotated PDF to blob/StringTheory |
+| `AnnotationsExported` | annotationsJson (STRING) | — | `ExportAnnotations()` completed; JSON contains `{ annotations, drawingHistory }` for editable round-trips |
 | `ErrorOccurred` | errorMessage (STRING) | — | Display or log the error |
 | `NavigationCompleted` | url (STRING) | success (LONG) | Low-level WebView2 event |
 | `NavigationStarting` | url (STRING) | — | Low-level WebView2 event |
@@ -602,18 +625,46 @@ ST2.DecodeBase64()                            ! decode back to binary for storag
 
 ---
 
-### Recipe 5 — Annotation export / restore
+### Recipe 5 — Editable annotation round-trip (save highlights, notes, drawings and restore them)
+
+This is the recommended pattern when you need annotations to remain **editable** after the document is reloaded. Store the original PDF bytes and annotation JSON separately (two-column pattern), then reload both.
+
+#### Saving
 
 ```clarion
-! Export all annotations to a STRING for storage
-AnnotJson = PDFViewerCOM_Ctrl{'ExportAnnotations'}
-! Store AnnotJson in a memo/blob field...
+! Trigger annotation export — result comes back asynchronously
+PDFViewerCOM_Ctrl{'ExportAnnotations'}
 
-! Restore annotations when re-opening the document
-PDFViewerCOM_Ctrl{'ExecuteScript'} = |
-  'window.pdfViewer.importAnnotations(' & clip(AnnotJson) & ')'
-! Call AFTER DocumentLoaded event fires
+! In AnnotationsExported event handler:
+OF 'AnnotationsExported'
+  AnnotJsonField = PDFViewerCOM.Parm1.GetValue()   ! store to memo/string field
+  OrigB64        = PDFViewerCOM_Ctrl{'SourceBase64'} ! get original PDF as base64
+  ST.SetValue(OrigB64)
+  ST.DecodeBase64()
+  ! Store ST binary content back to a blob field (original, unmodified PDF)
+  PUT(PdfRecord)  ! or whatever your save mechanism is
 ```
+
+#### Loading (in a Browse → Form open or similar)
+
+```clarion
+! In ViewerReady event:
+OF 'ViewerReady'
+  ST.SetValue(BlobField)   ! load from blob or wherever the original PDF is stored
+  ST.EncodeBase64()
+  PDFViewerCOM_Ctrl{'Base64Data'} = clip(ST.GetValue())
+  PDFViewerCOM_Ctrl{'LoadBase64Data'}
+
+! In DocumentLoaded event (annotations MUST be imported after the document loads):
+OF 'DocumentLoaded'
+  PageTotal = PDFViewerCOM.Parm1.GetLong()
+  IF clip(AnnotJsonField)  ! only if there are saved annotations
+    PDFViewerCOM_Ctrl{'AnnotationsData'} = clip(AnnotJsonField)
+    PDFViewerCOM_Ctrl{'ImportAnnotationsData'}
+  END
+```
+
+> **Why two events?** `ViewerReady` fires once when PDF.js initializes — load the PDF there. `DocumentLoaded` fires after each PDF loads — restore annotations there so they are applied to the correct document state.
 
 ---
 
