@@ -1169,15 +1169,39 @@ class PDFViewer {
 
     exportAnnotations() {
         // Exclude _el (DOM reference) before serializing
-        return JSON.stringify(this.annotations.map(a => {
+        const annotations = this.annotations.map(a => {
             const { _el, ...rest } = a;
             return rest;
-        }));
+        });
+        const json = JSON.stringify({ annotations, drawingHistory: this.drawingHistory });
+        // Send result back to C# via postMessage — fires AnnotationsExported COM event
+        this.sendMessage('annotationsExported', { data: json });
+        return json;
     }
 
     importAnnotations(json) {
         try {
-            JSON.parse(json).forEach(a => { if (a.type === 'note') this.placeNote(a.page, a.x, a.y, a.text); });
+            const parsed = JSON.parse(json);
+            // Support both old flat array format and new combined { annotations, drawingHistory }
+            const annotations  = Array.isArray(parsed) ? parsed : (parsed.annotations  ?? []);
+            const drawingHistory = Array.isArray(parsed) ? {}    : (parsed.drawingHistory ?? {});
+
+            // Restore highlights — push into annotations array, reapplyHighlights handles DOM
+            const highlights = annotations.filter(a => a.type === 'highlight');
+            highlights.forEach(a => this.annotations.push({ ...a }));
+            if (highlights.length) this.reapplyHighlights();
+
+            // Restore notes
+            annotations.filter(a => a.type === 'note').forEach(a => {
+                this.placeNote(a.page, a.x, a.y, a.text);
+            });
+
+            // Restore drawings — merge into drawingHistory and redraw each affected page
+            Object.entries(drawingHistory).forEach(([pageNum, strokes]) => {
+                const pn = parseInt(pageNum);
+                this.drawingHistory[pn] = [...(this.drawingHistory[pn] || []), ...strokes];
+                this.redrawPageCanvas(pn, null);
+            });
         } catch (e) { console.error('importAnnotations:', e); }
     }
 

@@ -91,6 +91,7 @@ namespace PDFViewerCOM
         private bool _allowSaveAs = true;
         private string _filePath;
         private string _base64Data;
+        private string _annotationsData;
         private byte[] _pdfSourceBytes;
 
         #endregion
@@ -114,6 +115,7 @@ namespace PDFViewerCOM
         public delegate void PrintCompletedDelegate(bool success);
         public delegate void ViewerReadyDelegate();
         public delegate void SaveAsBase64ReadyDelegate(string base64Data);
+        public delegate void AnnotationsExportedDelegate(string annotationsJson);
 
         #endregion
 
@@ -136,6 +138,7 @@ namespace PDFViewerCOM
         public event PrintCompletedDelegate PrintCompleted;
         public event ViewerReadyDelegate ViewerReady;
         public event SaveAsBase64ReadyDelegate SaveAsBase64Ready;
+        public event AnnotationsExportedDelegate AnnotationsExported;
 
         #endregion
 
@@ -364,6 +367,10 @@ namespace PDFViewerCOM
 
                     case "printCompleted":
                         RaisePrintCompleted(msg.success);
+                        break;
+
+                    case "annotationsExported":
+                        RaiseAnnotationsExported(msg.data ?? "{}");
                         break;
 
                     case "downloadRequested":
@@ -1108,20 +1115,46 @@ namespace PDFViewerCOM
         }
 
         [ComVisible(true)]
-        [Description("Export annotations as JSON")]
+        [Description("Trigger annotation export. Result is delivered asynchronously via the AnnotationsExported event.")]
         public string ExportAnnotations()
         {
             try
             {
-                // This returns synchronously - for now return empty
-                // Real implementation would need async/await pattern
-                return "[]";
+                ExecuteScript("window.pdfViewer?.exportAnnotations();");
+                return "";
             }
             catch (Exception ex)
             {
                 SetError($"ExportAnnotations error: {ex.Message}");
-                return "[]";
+                return "";
             }
+        }
+
+        [ComVisible(true)]
+        [Description("Gets the original PDF bytes (from LoadFile or LoadBase64) as a Base64 string. Store this alongside annotation JSON to enable editable round-trips.")]
+        public string SourceBase64
+        {
+            get
+            {
+                if (_pdfSourceBytes != null && _pdfSourceBytes.Length > 0)
+                    return Convert.ToBase64String(_pdfSourceBytes);
+                return "";
+            }
+        }
+
+        [ComVisible(true)]
+        [Description("Annotation JSON to import when ImportAnnotationsData() is called. Set this before calling ImportAnnotationsData().")]
+        public string AnnotationsData
+        {
+            get { return _annotationsData ?? "{}"; }
+            set { _annotationsData = value; }
+        }
+
+        [ComVisible(true)]
+        [Description("Import annotations from the AnnotationsData property. Set AnnotationsData first, then call this method.")]
+        public void ImportAnnotationsData()
+        {
+            ImportAnnotations(_annotationsData ?? "{}");
         }
 
         [ComVisible(true)]
@@ -1646,6 +1679,15 @@ namespace PDFViewerCOM
             if (SaveAsBase64Ready != null)
             {
                 try { SaveAsBase64Ready(base64Data); }
+                catch { }
+            }
+        }
+
+        private void RaiseAnnotationsExported(string annotationsJson)
+        {
+            if (AnnotationsExported != null)
+            {
+                try { AnnotationsExported(annotationsJson ?? "{}"); }
                 catch { }
             }
         }

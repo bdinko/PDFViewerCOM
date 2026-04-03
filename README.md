@@ -20,7 +20,8 @@ Built with the [ClarionCOM](https://github.com/peterparker57/ClarionCOM) framewo
 - **Permission Flags** — Per-feature show/hide for Highlight, Notes, Drawing, Save As, Sidebar, Annotations — set in `EVENT:OpenWindow` for role-based UI
 - **Text Selection** — Select and copy text from PDFs
 - **Registration-Free COM** — Manifest-based activation, no `regasm` needed
-- **17 COM Events** — Rich event model for full Clarion integration
+- **18 COM Events** — Rich event model for full Clarion integration
+- **Editable Annotation Round-Trip** — Save original PDF bytes (`SourceBase64`) + annotation JSON (`ExportAnnotations` / `AnnotationsExported` event) separately; reload with full editability
 
 ---
 
@@ -134,6 +135,11 @@ PDFViewer   OCX('PDFViewerCOM.PDFViewerCOMControl')
 | `ImportAnnotations(json)` | Import annotations from JSON |
 | `GetAnnotationsEnabled()` | Check if annotations are enabled |
 | `SetAnnotationsEnabled(value)` | Enable or disable annotations |
+| `ExportAnnotations()` | Trigger annotation export — result fires `AnnotationsExported` event with full JSON (highlights, notes, drawings) |
+| `ImportAnnotations(json)` | Import annotations from JSON (supports the full `{ annotations, drawingHistory }` format) |
+| `AnnotationsData` | Property: set annotation JSON before calling `ImportAnnotationsData()` |
+| `ImportAnnotationsData()` | Import annotations from the `AnnotationsData` property (Clarion-friendly parameterless form) |
+| `SourceBase64` | Read-only: original PDF bytes as Base64 (set by `LoadFile` or `LoadBase64`). Store with annotation JSON for editable round-trips. |
 
 ### Permission Properties
 
@@ -199,7 +205,8 @@ Annotation buttons are hidden by default. Set `AllowHighlight`, `AllowNotes`, an
 | `NavigationStarting` | `url` | WebView2 navigation started |
 | `NavigationCompleted` | `url`, `success` | WebView2 navigation finished |
 | `PrintCompleted` | `success` | Print operation finished |
-| `SaveAsBase64Ready` | `base64Data` | `SaveAsBase64()` completed; `base64Data` is the annotated PDF |
+| `SaveAsBase64Ready` | `base64Data` | `SaveAsBase64()` completed; `base64Data` is the annotated PDF (flattened) |
+| `AnnotationsExported` | `annotationsJson` | `ExportAnnotations()` completed; JSON contains `{ annotations, drawingHistory }` for editable round-trips |
 | `ErrorOccurred` | `errorMessage` | An error occurred |
 
 ---

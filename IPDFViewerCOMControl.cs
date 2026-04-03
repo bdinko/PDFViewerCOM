@@ -343,11 +343,34 @@ namespace PDFViewerCOM
         void ClearAnnotations();
 
         /// <summary>
-        /// Export annotations as JSON.
+        /// Trigger annotation export. Result is delivered asynchronously via the AnnotationsExported event.
+        /// In Clarion: PDFViewerCOM_Ctrl{'ExportAnnotations'} — handle AnnotationsExported event for the JSON.
         /// </summary>
-        /// <returns>JSON string containing all annotations</returns>
         [DispId(55)]
         string ExportAnnotations();
+
+        /// <summary>
+        /// Gets the original PDF bytes as Base64 (from LoadFile or LoadBase64).
+        /// Store this alongside annotation JSON to enable editable round-trips.
+        /// In Clarion: OrigB64 = PDFViewerCOM_Ctrl{'SourceBase64'}
+        /// </summary>
+        [DispId(103)]
+        string SourceBase64 { get; }
+
+        /// <summary>
+        /// Annotation JSON to import when ImportAnnotationsData() is called.
+        /// Set this before calling ImportAnnotationsData().
+        /// In Clarion: PDFViewerCOM_Ctrl{'AnnotationsData'} = clip(AnnotJsonField)
+        /// </summary>
+        [DispId(104)]
+        string AnnotationsData { get; set; }
+
+        /// <summary>
+        /// Import annotations from the AnnotationsData property.
+        /// In Clarion: PDFViewerCOM_Ctrl{'ImportAnnotationsData'}
+        /// </summary>
+        [DispId(105)]
+        void ImportAnnotationsData();
 
         /// <summary>
         /// Import annotations from JSON.

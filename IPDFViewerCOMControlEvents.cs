@@ -138,5 +138,15 @@ namespace PDFViewerCOM
         /// <param name="base64Data">Base64-encoded PDF bytes including all annotations</param>
         [DispId(17)]
         void SaveAsBase64Ready(string base64Data);
+
+        /// <summary>
+        /// Fired when ExportAnnotations() completes. Contains the full annotation JSON
+        /// including highlights, notes, and drawing strokes.
+        /// Read with: PDFViewerCOM.Parm1.GetValue()
+        /// Store alongside the original PDF (via SourceBase64) to enable editable round-trips.
+        /// </summary>
+        /// <param name="annotationsJson">JSON string with { annotations, drawingHistory }</param>
+        [DispId(18)]
+        void AnnotationsExported(string annotationsJson);
     }
 }
