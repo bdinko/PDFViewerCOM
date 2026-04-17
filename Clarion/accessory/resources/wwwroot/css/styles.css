@@ -1,0 +1,47 @@
+/* Base styles for WebView2 controls */
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#container {
+    height: 100%;
+    width: 100%;
+}
+
+/* Common utility classes */
+.hidden {
+    display: none !important;
+}
+
+.flex-container {
+    display: flex;
+}
+
+.full-height {
+    height: 100%;
+}
+
+.full-width {
+    width: 100%;
+}
+
+/* Loading state */
+.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+/* Error messages */
+.error-message {
+    color: #d32f2f;
+    padding: 10px;
+    margin: 10px;
+    border: 1px solid #d32f2f;
+    border-radius: 4px;
+    background-color: #ffebee;
+}

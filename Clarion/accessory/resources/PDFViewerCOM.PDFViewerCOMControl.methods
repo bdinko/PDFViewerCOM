@@ -1,0 +1,474 @@
+﻿[Property]
+SidebarVisible
+[PropertyType]
+BYTE
+[PropertyDescription]
+Gets or sets whether the sidebar is visible. Use from Clarion: PDFViewerCOM_Ctrl{'SidebarVisible'} = 0  (0=hide, 1=show) Can be set before ViewerReady â€” applied automatically when viewer initializes.
+
+[Property]
+AnnotationsEnabled
+[PropertyType]
+BYTE
+[PropertyDescription]
+Gets or sets whether annotations are enabled. Use from Clarion: PDFViewerCOM_Ctrl{'AnnotationsEnabled'} = 0  (0=disable, 1=enable) Can be set before ViewerReady â€” applied automatically when viewer initializes.
+
+[Property]
+AllowHighlight
+[PropertyType]
+BYTE
+[PropertyDescription]
+Gets or sets whether the Highlight button is visible. Default: false. Must be explicitly set to true to enable highlighting.
+
+[Property]
+AllowNotes
+[PropertyType]
+BYTE
+[PropertyDescription]
+Gets or sets whether the Note button is visible. Default: false. Must be explicitly set to true to enable note annotations.
+
+[Property]
+AllowDrawing
+[PropertyType]
+BYTE
+[PropertyDescription]
+Gets or sets whether the Draw button is visible. Default: false. Must be explicitly set to true to enable drawing.
+
+[Property]
+AllowSaveAs
+[PropertyType]
+BYTE
+[PropertyDescription]
+Gets or sets whether the Save As (Download) button is visible. Default: true. Set to false to prevent users from saving the document.
+
+[Property]
+FilePath
+[PropertyType]
+STRING
+[PropertyDescription]
+File path to load when LoadFilePath() is called. Set this before calling LoadFilePath(). Workaround for Clarion late-binding which cannot pass parameters to COM methods.
+
+[Property]
+Base64Data
+[PropertyType]
+STRING
+[PropertyDescription]
+Base64-encoded PDF data to load when LoadBase64Data() is called. Workaround for Clarion late-binding which cannot pass parameters to COM methods.
+
+[Property]
+SourceBase64
+[PropertyType]
+STRING
+[PropertyDescription]
+Gets the original PDF bytes as Base64 (from LoadFile or LoadBase64). Store this alongside annotation JSON to enable editable round-trips. In Clarion: OrigB64 = PDFViewerCOM_Ctrl{'SourceBase64'}
+
+[Property]
+AnnotationsData
+[PropertyType]
+STRING
+[PropertyDescription]
+Annotation JSON to import when ImportAnnotationsData() is called. Set this before calling ImportAnnotationsData(). In Clarion: PDFViewerCOM_Ctrl{'AnnotationsData'} = clip(AnnotJsonField)
+
+[Property]
+LoadType
+[PropertyType]
+STRING
+[PropertyDescription]
+Gets how the current document was loaded: 'base64' (LoadBase64/LoadBase64Data), 'file' (LoadFile/LoadFilePath), or 'url' (LoadUrl). Use in Clarion to guard ImportAnnotationsData() calls â€” only restore annotations when LoadType = 'base64', so disk/URL loads start clean. In Clarion: lType = PDFViewerCOM_Ctrl{'LoadType'}
+
+[Method]
+GetIsReady
+[MethodDescription]
+Gets whether WebView2 is fully initialized and ready.
+
+[Method]
+GetLastError
+[MethodDescription]
+Gets the last error message.
+
+[Method]
+GetSource
+[MethodDescription]
+Gets the current source URL or file path.
+
+[Method]
+GetCurrentPage
+[MethodDescription]
+Gets the current page number (1-based).
+
+[Method]
+GetPageCount
+[MethodDescription]
+Gets the total number of pages in the PDF.
+
+[Method]
+GetZoomLevel
+[MethodDescription]
+Gets the zoom level (1.0 = 100%).
+
+[Method]
+SetZoomLevel
+[MethodDescription]
+Sets the zoom level (1.0 = 100%).
+[Parameter]
+value
+[ParameterType]
+REAL
+[ParameterDescription]
+The zoom level to set
+
+[Method]
+GetSidebarVisible
+[MethodDescription]
+Gets whether the sidebar (thumbnails/bookmarks) is visible.
+
+[Method]
+SetSidebarVisible
+[MethodDescription]
+Sets whether the sidebar (thumbnails/bookmarks) is visible.
+[Parameter]
+value
+[ParameterType]
+BYTE
+[ParameterDescription]
+True to show sidebar, false to hide
+
+[Method]
+GetAnnotationsEnabled
+[MethodDescription]
+Gets whether annotations are enabled.
+
+[Method]
+SetAnnotationsEnabled
+[MethodDescription]
+Sets whether annotations are enabled.
+[Parameter]
+value
+[ParameterType]
+BYTE
+[ParameterDescription]
+True to enable annotations, false to disable
+
+[Method]
+LoadFilePath
+[MethodDescription]
+Load the PDF file stored in the FilePath property. Use this from Clarion: set FilePath property first, then call LoadFilePath().
+
+[Method]
+LoadBase64Data
+[MethodDescription]
+Load the PDF from the Base64Data property. Use this from Clarion: set Base64Data property first, then call LoadBase64Data().
+
+[Method]
+LoadFile
+[MethodDescription]
+Load a PDF file from a file path.
+[Parameter]
+filePath
+[ParameterType]
+STRING
+[ParameterDescription]
+Full path to the PDF file
+
+[Method]
+LoadUrl
+[MethodDescription]
+Load a PDF from a URL.
+[Parameter]
+url
+[ParameterType]
+STRING
+[ParameterDescription]
+URL to the PDF document
+
+[Method]
+LoadBase64
+[MethodDescription]
+Load a PDF from Base64-encoded data.
+[Parameter]
+base64Data
+[ParameterType]
+STRING
+[ParameterDescription]
+Base64-encoded PDF data
+
+[Method]
+CloseDocument
+[MethodDescription]
+Close the current PDF document.
+
+[Method]
+GoToPage
+[MethodDescription]
+Navigate to a specific page.
+[Parameter]
+pageNumber
+[ParameterType]
+LONG
+[ParameterDescription]
+Page number (1-based)
+
+[Method]
+NextPage
+[MethodDescription]
+Navigate to the next page.
+
+[Method]
+PreviousPage
+[MethodDescription]
+Navigate to the previous page.
+
+[Method]
+FirstPage
+[MethodDescription]
+Navigate to the first page.
+
+[Method]
+LastPage
+[MethodDescription]
+Navigate to the last page.
+
+[Method]
+ZoomIn
+[MethodDescription]
+Zoom in by a standard increment.
+
+[Method]
+ZoomOut
+[MethodDescription]
+Zoom out by a standard increment.
+
+[Method]
+SetZoom
+[MethodDescription]
+Set zoom level to a specific percentage.
+[Parameter]
+percentage
+[ParameterType]
+REAL
+[ParameterDescription]
+Zoom percentage (e.g., 100 for 100%)
+
+[Method]
+FitWidth
+[MethodDescription]
+Fit the page width to the viewer width.
+
+[Method]
+FitPage
+[MethodDescription]
+Fit the entire page in the viewer.
+
+[Method]
+ActualSize
+[MethodDescription]
+Reset zoom to 100%.
+
+[Method]
+Search
+[MethodDescription]
+Search for text in the document.
+[Parameter]
+searchText
+[ParameterType]
+STRING
+[ParameterDescription]
+Text to search for
+[Parameter]
+caseSensitive
+[ParameterType]
+BYTE
+[ParameterDescription]
+Whether search is case-sensitive
+
+[Method]
+FindNext
+[MethodDescription]
+Find the next occurrence of the search text.
+
+[Method]
+FindPrevious
+[MethodDescription]
+Find the previous occurrence of the search text.
+
+[Method]
+ClearSearch
+[MethodDescription]
+Clear search highlighting.
+
+[Method]
+HighlightSelection
+[MethodDescription]
+Add a highlight annotation to the current selection.
+[Parameter]
+color
+[ParameterType]
+STRING
+[ParameterDescription]
+Highlight color (e.g., "#FFFF00" for yellow)
+
+[Method]
+AddNote
+[MethodDescription]
+Add a text note annotation at the specified position.
+[Parameter]
+pageNumber
+[ParameterType]
+LONG
+[ParameterDescription]
+Page number (1-based)
+[Parameter]
+x
+[ParameterType]
+REAL
+[ParameterDescription]
+X coordinate
+[Parameter]
+y
+[ParameterType]
+REAL
+[ParameterDescription]
+Y coordinate
+[Parameter]
+text
+[ParameterType]
+STRING
+[ParameterDescription]
+Note text content
+
+[Method]
+EnableDrawing
+[MethodDescription]
+Enable drawing mode for freehand annotations.
+[Parameter]
+color
+[ParameterType]
+STRING
+[ParameterDescription]
+Stroke color
+[Parameter]
+width
+[ParameterType]
+LONG
+[ParameterDescription]
+Stroke width in pixels
+
+[Method]
+DisableDrawing
+[MethodDescription]
+Disable drawing mode.
+
+[Method]
+ClearAnnotations
+[MethodDescription]
+Delete all annotations on the current page.
+
+[Method]
+ExportAnnotations
+[MethodDescription]
+Trigger annotation export. Result is delivered asynchronously via the AnnotationsExported event. In Clarion: PDFViewerCOM_Ctrl{'ExportAnnotations'} â€” handle AnnotationsExported event for the JSON.
+
+[Method]
+ImportAnnotationsData
+[MethodDescription]
+Import annotations from the AnnotationsData property. In Clarion: PDFViewerCOM_Ctrl{'ImportAnnotationsData'}
+
+[Method]
+ImportAnnotations
+[MethodDescription]
+Import annotations from JSON.
+[Parameter]
+annotationsJson
+[ParameterType]
+STRING
+[ParameterDescription]
+JSON string containing annotations
+
+[Method]
+Print
+[MethodDescription]
+Print the document using the system print dialog.
+
+[Method]
+SaveAs
+[MethodDescription]
+Download/save the current PDF (including annotations if any).
+[Parameter]
+filePath
+[ParameterType]
+STRING
+[ParameterDescription]
+Destination file path
+
+[Method]
+SaveAsBase64
+[MethodDescription]
+Save the current view with all annotations (highlights, notes, drawings) as a Base64-encoded PDF. The result is returned asynchronously via the SaveAsBase64Ready event. Use this when the document was loaded via LoadBase64 (e.g., from a StringTheory object).
+
+[Method]
+ToggleSidebar
+[MethodDescription]
+Toggle the sidebar visibility (thumbnails/bookmarks panel).
+
+[Method]
+ShowThumbnails
+[MethodDescription]
+Show the thumbnails panel in the sidebar.
+
+[Method]
+ShowBookmarks
+[MethodDescription]
+Show the bookmarks/outline panel in the sidebar.
+
+[Method]
+RotateClockwise
+[MethodDescription]
+Rotate the current page clockwise by 90 degrees.
+
+[Method]
+RotateCounterClockwise
+[MethodDescription]
+Rotate the current page counter-clockwise by 90 degrees.
+
+[Method]
+Navigate
+[MethodDescription]
+Navigate to a URL (base WebView2 functionality).
+[Parameter]
+url
+[ParameterType]
+STRING
+[ParameterDescription]
+The URL to navigate to
+
+[Method]
+Refresh
+[MethodDescription]
+Refresh the current page.
+
+[Method]
+ExecuteScript
+[MethodDescription]
+Execute JavaScript code in the current page.
+[Parameter]
+script
+[ParameterType]
+STRING
+[ParameterDescription]
+The JavaScript code to execute
+
+[Method]
+PostMessage
+[MethodDescription]
+Post a message to JavaScript. JavaScript can receive via: window.chrome.webview.addEventListener('message', handler)
+[Parameter]
+message
+[ParameterType]
+STRING
+[ParameterDescription]
+The message to send (string or JSON)
+
+[Method]
+About
+[MethodDescription]
+Displays control name and version information in a MessageBox.
+

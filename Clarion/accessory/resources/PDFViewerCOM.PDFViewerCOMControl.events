@@ -1,0 +1,216 @@
+﻿[Event]
+ControlReady
+[EventDescription]
+Fired when WebView2 is fully initialized and ready for use.
+[Event]
+ErrorOccurred
+[EventDescription]
+Fired when an error occurs.
+[Parameter1]
+errorMessage
+[Parameter1Type]
+STRING
+[Parameter1Description]
+Description of the error
+[Event]
+NavigationCompleted
+[EventDescription]
+Fired when navigation completes.
+[Parameter1]
+url
+[Parameter1Type]
+STRING
+[Parameter1Description]
+The URL that was navigated to
+[Parameter2]
+success
+[Parameter2Type]
+BYTE
+[Parameter2Description]
+Whether navigation succeeded
+[Event]
+NavigationStarting
+[EventDescription]
+Fired when navigation starts.
+[Parameter1]
+url
+[Parameter1Type]
+STRING
+[Parameter1Description]
+The URL being navigated to
+[Event]
+DocumentLoaded
+[EventDescription]
+Fired when a PDF document is loaded and fully rendered. All page elements exist â€” safe to call ImportAnnotationsData() immediately. Read PDFViewerCOM_Ctrl{'LoadType'} to determine how the document was loaded: 'base64', 'file', or 'url'. IMPORTANT: Guard ImportAnnotationsData() with LoadType â€” only restore annotations when LoadType = 'base64', otherwise annotations from a previous load will bleed into the new document.
+[Parameter1]
+pageCount
+[Parameter1Type]
+LONG
+[Parameter1Description]
+Total number of pages in the document
+[Parameter2]
+title
+[Parameter2Type]
+STRING
+[Parameter2Description]
+Document title (if available)
+[Event]
+PageChanged
+[EventDescription]
+Fired when the current page changes.
+[Parameter1]
+pageNumber
+[Parameter1Type]
+LONG
+[Parameter1Description]
+The new current page number (1-based)
+[Event]
+ZoomChanged
+[EventDescription]
+Fired when the zoom level changes.
+[Parameter1]
+zoomLevel
+[Parameter1Type]
+REAL
+[Parameter1Description]
+The new zoom level (1.0 = 100%)
+[Event]
+SearchCompleted
+[EventDescription]
+Fired when a search completes.
+[Parameter1]
+matchCount
+[Parameter1Type]
+LONG
+[Parameter1Description]
+Number of matches found
+[Parameter2]
+currentMatch
+[Parameter2Type]
+LONG
+[Parameter2Description]
+Current match index (1-based)
+[Event]
+AnnotationAdded
+[EventDescription]
+Fired when an annotation is added.
+[Parameter1]
+annotationType
+[Parameter1Type]
+STRING
+[Parameter1Description]
+Type of annotation (highlight, note, drawing)
+[Parameter2]
+pageNumber
+[Parameter2Type]
+LONG
+[Parameter2Description]
+Page where annotation was added
+[Event]
+AnnotationSelected
+[EventDescription]
+Fired when an annotation is selected.
+[Parameter1]
+annotationId
+[Parameter1Type]
+STRING
+[Parameter1Description]
+ID of the selected annotation
+[Parameter2]
+annotationType
+[Parameter2Type]
+STRING
+[Parameter2Description]
+Type of annotation
+[Event]
+BookmarkClicked
+[EventDescription]
+Fired when a bookmark/outline item is clicked.
+[Parameter1]
+title
+[Parameter1Type]
+STRING
+[Parameter1Description]
+Title of the bookmark
+[Parameter2]
+pageNumber
+[Parameter2Type]
+LONG
+[Parameter2Description]
+Destination page number
+[Event]
+ThumbnailClicked
+[EventDescription]
+Fired when a thumbnail is clicked.
+[Parameter1]
+pageNumber
+[Parameter1Type]
+LONG
+[Parameter1Description]
+Page number of the clicked thumbnail
+[Event]
+TextSelected
+[EventDescription]
+Fired when text is selected in the PDF.
+[Parameter1]
+selectedText
+[Parameter1Type]
+STRING
+[Parameter1Description]
+The selected text
+[Parameter2]
+pageNumber
+[Parameter2Type]
+LONG
+[Parameter2Description]
+Page where text was selected
+[Event]
+LinkClicked
+[EventDescription]
+Fired when a link in the PDF is clicked.
+[Parameter1]
+url
+[Parameter1Type]
+STRING
+[Parameter1Description]
+The URL of the link
+[Parameter2]
+isInternal
+[Parameter2Type]
+BYTE
+[Parameter2Description]
+True if link is internal to the document
+[Event]
+PrintCompleted
+[EventDescription]
+Fired when print operation completes.
+[Parameter1]
+success
+[Parameter1Type]
+BYTE
+[Parameter1Description]
+Whether print was successful
+[Event]
+ViewerReady
+[EventDescription]
+Fired when the PDF viewer JavaScript component is fully initialized and ready to load documents. Use this event instead of ControlReady to call LoadFile, LoadUrl, or LoadBase64.
+[Event]
+SaveAsBase64Ready
+[EventDescription]
+Fired when SaveAsBase64() completes. Contains the annotated PDF as Base64-encoded data. Pass Parm1 to a StringTheory object (e.g., st.SetValue(PDFViewerCOM.Parm1.GetValue())).
+[Parameter1]
+base64Data
+[Parameter1Type]
+STRING
+[Parameter1Description]
+Base64-encoded PDF bytes including all annotations
+[Event]
+AnnotationsExported
+[EventDescription]
+Fired when ExportAnnotations() completes. Contains the full annotation JSON including highlights, notes, and drawing strokes. Read with: PDFViewerCOM.Parm1.GetValue() Store alongside the original PDF (via SourceBase64) to enable editable round-trips.
+[Parameter1]
+annotationsJson
+[Parameter1Type]
+STRING
+[Parameter1Description]
+JSON string with { annotations, drawingHistory }

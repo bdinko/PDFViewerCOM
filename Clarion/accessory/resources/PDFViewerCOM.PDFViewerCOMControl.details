@@ -1,0 +1,10 @@
+﻿[FriendlyName]
+PDFViewerCOMControl
+[ProgID]
+PDFViewerCOM.PDFViewerCOMControl
+[FilenameNoExtenstion]
+PDFViewerCOM
+[Description]
+Host object for JavaScript to C# communication.
+[ObjectName]
+PDFViewerCOM_PDFViewerCOMControl

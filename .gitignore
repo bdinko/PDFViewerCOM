@@ -1,0 +1,25 @@
+# Build output
+bin/
+obj/
+*.dll
+*.pdb
+*.suo
+*.user
+*.cache
+
+# Visual Studio
+.vs/
+*.ncb
+*.sdf
+
+# COM registration artifacts
+*.tlb
+*.exp
+*.lib
+
+# NuGet
+packages/
+*.nupkg
+
+# User-specific
+*.userprefs

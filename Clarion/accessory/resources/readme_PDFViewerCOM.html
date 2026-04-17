@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDFViewerCOM - API Documentation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #2d3748;
+            background: #f7fafc;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        .header .subtitle {
+            font-size: 1.2em;
+            opacity: 0.95;
+        }
+        .content {
+            padding: 40px;
+        }
+        .info-box {
+            background: #ebf8ff;
+            border-left: 4px solid #4299e1;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+        .info-box strong {
+            color: #2c5282;
+        }
+        h2 {
+            color: #2d3748;
+            font-size: 1.8em;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+        }
+        h3 {
+            color: #4a5568;
+            font-size: 1.3em;
+            margin: 25px 0 15px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #e2e8f0;
+            vertical-align: top;
+        }
+        tr:hover {
+            background-color: #f7fafc;
+        }
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+        code {
+            background: #edf2f7;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.9em;
+            color: #2d3748;
+            border: 1px solid #e2e8f0;
+        }
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .badge-property {
+            background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+            color: white;
+        }
+        .badge-method {
+            background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+            color: white;
+        }
+        .badge-event {
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+        }
+        .section-card {
+            background: #f7fafc;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid #e2e8f0;
+        }
+        .tech-badge {
+            display: inline-block;
+            background: #2d3748;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85em;
+            margin-right: 8px;
+            margin-bottom: 8px;
+        }
+        ul {
+            margin: 15px 0;
+            padding-left: 25px;
+        }
+        li {
+            margin: 8px 0;
+            color: #4a5568;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+            text-align: center;
+            color: #718096;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>PDFViewer</h1>
+            <p class="subtitle">COM Control for Clarion Applications</p>
+        </div>
+        <div class="content">
+            <div class="info-box">
+                <strong>ProgID:</strong> <code>PDFViewerCOM.PDFViewer</code><br>
+                <strong>Assembly:</strong> <code>PDFViewerCOM.dll</code><br>
+                <strong>Type:</strong> Registration-Free COM (RegFree)
+            </div>
+
+            <div class="section-card">
+                <h3>Deployment Files</h3>
+                <p>This control package includes all necessary files for deployment:</p>
+                <ul>
+                    <li><code>PDFViewerCOM.dll</code> - The COM control library</li>
+                    <li><code>PDFViewerCOM.manifest</code> - RegFree COM registration</li>
+                    <li><code>PDFViewerCOM.details</code> - Control metadata</li>
+                    <li><code>PDFViewerCOM.events</code> - Event definitions</li>
+                    <li><code>PDFViewerCOM.methods</code> - Properties and methods reference</li>
+                </ul>
+            </div>
+
+            <h2>Properties</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+            <tr>
+                <td><span class="badge badge-property">SidebarVisible</span></td>
+                <td><code>BYTE</code></td>
+                <td>Gets or sets whether the sidebar is visible. Use from Clarion: PDFViewerCOM_Ctrl{'SidebarVisible'} = 0  (0=hide, 1=show) Can be set before ViewerReady â€” applied automatically when viewer initializes.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-property">AnnotationsEnabled</span></td>
+                <td><code>BYTE</code></td>
+                <td>Gets or sets whether annotations are enabled. Use from Clarion: PDFViewerCOM_Ctrl{'AnnotationsEnabled'} = 0  (0=disable, 1=enable) Can be set before ViewerReady â€” applied automatically when viewer initializes.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-property">AllowHighlight</span></td>
+                <td><code>BYTE</code></td>
+                <td>Gets or sets whether the Highlight button is visible. Default: false. Must be explicitly set to true to enable highlighting.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-property">AllowNotes</span></td>
+                <td><code>BYTE</code></td>
+                <td>Gets or sets whether the Note button is visible. Default: false. Must be explicitly set to true to enable note annotations.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-property">AllowDrawing</span></td>
+                <td><code>BYTE</code></td>
+                <td>Gets or sets whether the Draw button is visible. Default: false. Must be explicitly set to true to enable drawing.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-property">AllowSaveAs</span></td>
+                <td><code>BYTE</code></td>
+                <td>Gets or sets whether the Save As (Download) button is visible. Default: true. Set to false to prevent users from saving the document.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-property">FilePath</span></td>
+                <td><code>STRING</code></td>
+                <td>File path to load when LoadFilePath() is called. Set this before calling LoadFilePath(). Workaround for Clarion late-binding which cannot pass parameters to COM methods.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-property">Base64Data</span></td>
+                <td><code>STRING</code></td>
+                <td>Base64-encoded PDF data to load when LoadBase64Data() is called. Workaround for Clarion late-binding which cannot pass parameters to COM methods.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-property">AnnotationsData</span></td>
+                <td><code>STRING</code></td>
+                <td>Annotation JSON to import when ImportAnnotationsData() is called. Set this before calling ImportAnnotationsData(). In Clarion: PDFViewerCOM_Ctrl{'AnnotationsData'} = clip(AnnotJsonField)</td>
+            </tr>
+                </tbody>
+            </table>
+
+            <h2>Methods</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>Description</th>
+                        <th>Returns</th>
+                    </tr>
+                </thead>
+                <tbody>
+            <tr>
+                <td><span class="badge badge-method">GetIsReady()</span></td>
+                <td>Gets whether WebView2 is fully initialized and ready.</td>
+                <td><code>BYTE</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">GetLastError()</span></td>
+                <td>Gets the last error message.</td>
+                <td><code>STRING</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">GetSource()</span></td>
+                <td>Gets the current source URL or file path.</td>
+                <td><code>STRING</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">GetCurrentPage()</span></td>
+                <td>Gets the current page number (1-based).</td>
+                <td><code>LONG</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">GetPageCount()</span></td>
+                <td>Gets the total number of pages in the PDF.</td>
+                <td><code>LONG</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">GetZoomLevel()</span></td>
+                <td>Gets the zoom level (1.0 = 100%).</td>
+                <td><code>REAL</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">SetZoomLevel(value REAL)</span></td>
+                <td>Sets the zoom level (1.0 = 100%).</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">GetSidebarVisible()</span></td>
+                <td>Gets whether the sidebar (thumbnails/bookmarks) is visible.</td>
+                <td><code>BYTE</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">SetSidebarVisible(value BYTE)</span></td>
+                <td>Sets whether the sidebar (thumbnails/bookmarks) is visible.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">GetAnnotationsEnabled()</span></td>
+                <td>Gets whether annotations are enabled.</td>
+                <td><code>BYTE</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">SetAnnotationsEnabled(value BYTE)</span></td>
+                <td>Sets whether annotations are enabled.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">LoadFilePath()</span></td>
+                <td>Load the PDF file stored in the FilePath property. Use this from Clarion: set FilePath property first, then call LoadFilePath().</td>
+                <td><code>STRING</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">LoadBase64Data()</span></td>
+                <td>Load the PDF from the Base64Data property. Use this from Clarion: set Base64Data property first, then call LoadBase64Data().</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">LoadFile(filePath STRING)</span></td>
+                <td>Load a PDF file from a file path.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">LoadUrl(url STRING)</span></td>
+                <td>Load a PDF from a URL.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">LoadBase64(base64Data STRING)</span></td>
+                <td>Load a PDF from Base64-encoded data.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">CloseDocument()</span></td>
+                <td>Close the current PDF document.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">GoToPage(pageNumber LONG)</span></td>
+                <td>Navigate to a specific page.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">NextPage()</span></td>
+                <td>Navigate to the next page.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">PreviousPage()</span></td>
+                <td>Navigate to the previous page.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">FirstPage()</span></td>
+                <td>Navigate to the first page.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">LastPage()</span></td>
+                <td>Navigate to the last page.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">ZoomIn()</span></td>
+                <td>Zoom in by a standard increment.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">ZoomOut()</span></td>
+                <td>Zoom out by a standard increment.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">SetZoom(percentage REAL)</span></td>
+                <td>Set zoom level to a specific percentage.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">FitWidth()</span></td>
+                <td>Fit the page width to the viewer width.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">FitPage()</span></td>
+                <td>Fit the entire page in the viewer.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">ActualSize()</span></td>
+                <td>Reset zoom to 100%.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">Search(searchText STRING, caseSensitive BYTE)</span></td>
+                <td>Search for text in the document.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">FindNext()</span></td>
+                <td>Find the next occurrence of the search text.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">FindPrevious()</span></td>
+                <td>Find the previous occurrence of the search text.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">ClearSearch()</span></td>
+                <td>Clear search highlighting.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">HighlightSelection(color STRING)</span></td>
+                <td>Add a highlight annotation to the current selection.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">AddNote(pageNumber LONG, x REAL, y REAL, text STRING)</span></td>
+                <td>Add a text note annotation at the specified position.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">EnableDrawing(color STRING, width LONG)</span></td>
+                <td>Enable drawing mode for freehand annotations.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">DisableDrawing()</span></td>
+                <td>Disable drawing mode.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">ClearAnnotations()</span></td>
+                <td>Delete all annotations on the current page.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">ExportAnnotations()</span></td>
+                <td>Trigger annotation export. Result is delivered asynchronously via the AnnotationsExported event. In Clarion: PDFViewerCOM_Ctrl{'ExportAnnotations'} â€” handle AnnotationsExported event for the JSON.</td>
+                <td><code>STRING</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">ImportAnnotationsData()</span></td>
+                <td>Import annotations from the AnnotationsData property. In Clarion: PDFViewerCOM_Ctrl{'ImportAnnotationsData'}</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">ImportAnnotations(annotationsJson STRING)</span></td>
+                <td>Import annotations from JSON.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">Print()</span></td>
+                <td>Print the document using the system print dialog.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">SaveAs(filePath STRING)</span></td>
+                <td>Download/save the current PDF (including annotations if any).</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">SaveAsBase64()</span></td>
+                <td>Save the current view with all annotations (highlights, notes, drawings) as a Base64-encoded PDF. The result is returned asynchronously via the SaveAsBase64Ready event. Use this when the document was loaded via LoadBase64 (e.g., from a StringTheory object).</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">ToggleSidebar()</span></td>
+                <td>Toggle the sidebar visibility (thumbnails/bookmarks panel).</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">ShowThumbnails()</span></td>
+                <td>Show the thumbnails panel in the sidebar.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">ShowBookmarks()</span></td>
+                <td>Show the bookmarks/outline panel in the sidebar.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">RotateClockwise()</span></td>
+                <td>Rotate the current page clockwise by 90 degrees.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">RotateCounterClockwise()</span></td>
+                <td>Rotate the current page counter-clockwise by 90 degrees.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">Navigate(url STRING)</span></td>
+                <td>Navigate to a URL (base WebView2 functionality).</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">Refresh()</span></td>
+                <td>Refresh the current page.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">ExecuteScript(script STRING)</span></td>
+                <td>Execute JavaScript code in the current page.</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">PostMessage(message STRING)</span></td>
+                <td>Post a message to JavaScript. JavaScript can receive via: window.chrome.webview.addEventListener('message', handler)</td>
+                <td><code>void</code></td>
+            </tr>            <tr>
+                <td><span class="badge badge-method">About()</span></td>
+                <td>Displays control name and version information in a MessageBox.</td>
+                <td><code>void</code></td>
+            </tr>
+                </tbody>
+            </table>
+
+            <h2>Events</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Parameters</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+            <tr>
+                <td><span class="badge badge-event">ControlReady</span></td>
+                <td><code>none</code></td>
+                <td>Fired when WebView2 is fully initialized and ready for use.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">ErrorOccurred</span></td>
+                <td><code>errorMessage STRING</code></td>
+                <td>Fired when an error occurs.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">NavigationCompleted</span></td>
+                <td><code>url STRING, success BYTE</code></td>
+                <td>Fired when navigation completes.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">NavigationStarting</span></td>
+                <td><code>url STRING</code></td>
+                <td>Fired when navigation starts.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">DocumentLoaded</span></td>
+                <td><code>pageCount LONG, title STRING</code></td>
+                <td>Fired when a PDF document is loaded and fully rendered. All page elements exist â€” safe to call ImportAnnotationsData() immediately. Read PDFViewerCOM_Ctrl{'LoadType'} to determine how the document was loaded: 'base64', 'file', or 'url'. IMPORTANT: Guard ImportAnnotationsData() with LoadType â€” only restore annotations when LoadType = 'base64', otherwise annotations from a previous load will bleed into the new document.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">PageChanged</span></td>
+                <td><code>pageNumber LONG</code></td>
+                <td>Fired when the current page changes.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">ZoomChanged</span></td>
+                <td><code>zoomLevel REAL</code></td>
+                <td>Fired when the zoom level changes.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">SearchCompleted</span></td>
+                <td><code>matchCount LONG, currentMatch LONG</code></td>
+                <td>Fired when a search completes.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">AnnotationAdded</span></td>
+                <td><code>annotationType STRING, pageNumber LONG</code></td>
+                <td>Fired when an annotation is added.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">AnnotationSelected</span></td>
+                <td><code>annotationId STRING, annotationType STRING</code></td>
+                <td>Fired when an annotation is selected.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">BookmarkClicked</span></td>
+                <td><code>title STRING, pageNumber LONG</code></td>
+                <td>Fired when a bookmark/outline item is clicked.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">ThumbnailClicked</span></td>
+                <td><code>pageNumber LONG</code></td>
+                <td>Fired when a thumbnail is clicked.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">TextSelected</span></td>
+                <td><code>selectedText STRING, pageNumber LONG</code></td>
+                <td>Fired when text is selected in the PDF.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">LinkClicked</span></td>
+                <td><code>url STRING, isInternal BYTE</code></td>
+                <td>Fired when a link in the PDF is clicked.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">PrintCompleted</span></td>
+                <td><code>success BYTE</code></td>
+                <td>Fired when print operation completes.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">ViewerReady</span></td>
+                <td><code>none</code></td>
+                <td>Fired when the PDF viewer JavaScript component is fully initialized and ready to load documents. Use this event instead of ControlReady to call LoadFile, LoadUrl, or LoadBase64.</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">SaveAsBase64Ready</span></td>
+                <td><code>base64Data STRING</code></td>
+                <td>Fired when SaveAsBase64() completes. Contains the annotated PDF as Base64-encoded data. Pass Parm1 to a StringTheory object (e.g., st.SetValue(PDFViewerCOM.Parm1.GetValue())).</td>
+            </tr>            <tr>
+                <td><span class="badge badge-event">AnnotationsExported</span></td>
+                <td><code>annotationsJson STRING</code></td>
+                <td>Fired when ExportAnnotations() completes. Contains the full annotation JSON including highlights, notes, and drawing strokes. Read with: PDFViewerCOM.Parm1.GetValue() Store alongside the original PDF (via SourceBase64) to enable editable round-trips.</td>
+            </tr>
+                </tbody>
+            </table>
+
+            <h2>Technical Specifications</h2>
+            <div class="section-card">
+                <p><strong>Technology Stack:</strong></p>
+                <div>
+                    <span class="tech-badge">.NET Framework 4.7.2</span>
+                    <span class="tech-badge">Win32 (x86)</span>
+                    <span class="tech-badge">RegFree COM</span>
+                    <span class="tech-badge">Apartment Threading</span>
+                </div>
+                <br><br>
+                <p><strong>COM Configuration:</strong></p>
+                <ul>
+                    <li><strong>ProgID:</strong> <code>PDFViewerCOM.PDFViewer</code></li>
+                    <li><strong>Registration:</strong> Registration-Free (no registry modifications)</li>
+                    <li><strong>Threading Model:</strong> Apartment (STA)</li>
+                    <li><strong>Platform:</strong> x86 (32-bit) for Clarion compatibility</li>
+                </ul>
+            </div>
+
+            <h2>Additional Resources</h2>
+            <div class="section-card">
+                <p>The following files are provided with this control:</p>
+                <ul>
+                    <li><code>PDFViewerCOM.methods</code> - Properties and methods reference with Clarion data types</li>
+                    <li><code>PDFViewerCOM.events</code> - Event definitions with parameters</li>
+                    <li><code>PDFViewerCOM.details</code> - Control metadata and ProgID information</li>
+                </ul>
+                <p>These files are automatically generated during the build process and provide accurate Clarion-specific implementation details.</p>
+            </div>
+
+            <div class="footer">
+                <p>Generated for Clarion Development</p>
+                <p>Registration-Free COM â€˘ No Registry Pollution â€˘ Clean Deployment</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
