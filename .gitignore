@@ -23,3 +23,13 @@ packages/
 
 # User-specific
 *.userprefs
+
+# Claude Code / MCP local config
+.claude/
+.mcp.json
+.mcp.json.bak
+
+# Local session notes
+Links.txt
+resume last session.txt
+Working on DocumentLoaded.txt
